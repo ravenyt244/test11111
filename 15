@@ -1,0 +1,119 @@
+if game.PlaceId == 75992362647444 then
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+    local Window = Library.CreateLib("AzraHub • Tap Simulator", {
+        SchemeColor = Color3.fromRGB(83, 91, 255),
+        Background = Color3.fromRGB(0, 0, 0),
+        Header = Color3.fromRGB(0, 0, 0),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        ElementColor = Color3.fromRGB(20, 20, 20)
+    })
+
+
+    local Info = Window:NewTab("Info")
+    local InfoSection = Info:NewSection("Information")
+    InfoSection:NewButton("Copy Discord Link", "Join our discord server!", function()
+        setclipboard("https://discord.gg/hnmJ3nsHS9")
+    end)
+
+    -- Example Tab: Main
+    local Main = Window:NewTab("Main")
+    local MainSection = Main:NewSection("Auto Clicker")
+
+   -- control variable
+    local AutoClicker = false
+
+    MainSection:NewToggle("Auto-Clicker [FAST]", "100 Clicks per second", function(state)
+    AutoClicker = state
+
+    if AutoClicker then
+        task.spawn(function()
+            while AutoClicker do
+                game:GetService("ReplicatedStorage")
+                    ["342a226d-1657-4d38-94b4-99ef454c7f7b"]
+                    .Events.Tap:FireServer(true, false)
+
+                task.wait(0.01) -- 100 clicks per second
+            end
+        end)
+    end
+end)
+
+    local rebirthOptions = {
+    "+35t Rebirths","+15t Rebirths","+5t Rebirths","+1t Rebirths",
+    "+700b Rebirths","+350b Rebirths","+150b Rebirths","+50b Rebirths",
+    "+10b Rebirths","+7b Rebirths","+3.5b Rebirths","+1.5b Rebirths",
+    "+500m Rebirths","+100m Rebirths","+70m Rebirths","+35m Rebirths",
+    "+15m Rebirths","+5m Rebirths","+1m Rebirths",
+    "+700k Rebirths","+350k Rebirths","+150k Rebirths","+50k Rebirths",
+    "+10k Rebirths","+7k Rebirths","+3.5k Rebirths","+1.5k Rebirths",
+    "+500 Rebirths","+100 Rebirths","+70 Rebirths","+35 Rebirths",
+    "+15 Rebirths","+5 Rebirths","+1 Rebirth",
+    }
+
+    -- NewLabel
+    MainSection:NewLabel("Auto Rebirth")
+    local selectedRebirthIndex = 1
+
+MainSection:NewDropdown(
+    "Choose Rebirth!",
+    "Choose your automatic rebirth amount here",
+    rebirthOptions,
+    function(selected)
+        for index, name in ipairs(rebirthOptions) do
+            if name == selected then
+                selectedRebirthIndex = index
+                break
+            end
+        end
+    end
+)
+
+
+    local AutoRebirth = false
+
+MainSection:NewToggle("Auto Rebirth", "Automatically rebirth based on selection", function(state)
+    AutoRebirth = state
+
+    if AutoRebirth then
+        task.spawn(function()
+            while AutoRebirth do
+                game:GetService("ReplicatedStorage")
+                    ["342a226d-1657-4d38-94b4-99ef454c7f7b"]
+                    .Functions.Rebirth:InvokeServer(selectedRebirthIndex)
+
+                task.wait(0.5) -- safe delay (adjust if needed)
+            end
+        end)
+    end
+end)
+
+    -- Example Tab: Customize
+    local Customize = Window:NewTab("Customize")
+    local CustomizeSection = Customize:NewSection("Color Custom")
+
+    -- NewColorPicker
+    CustomizeSection:NewColorPicker("SchemeColor", "Change your SchemeColor", Color3.fromRGB(0, 255, 255), function(color)
+        Library:ChangeColor("SchemeColor", color)
+    end)
+
+    -- Anti-AFK
+    local GC = getconnections or get_signal_cons
+    if GC then
+        for i, v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+            if v["Disable"] then
+                v["Disable"](v)
+            elseif v["Disconnect"] then
+                v["Disconnect"](v)
+            end
+        end
+    else
+        local vu = game:GetService("VirtualUser")
+        game:GetService("Players").LocalPlayer.Idled:connect(function()
+            vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+            wait(1)
+            vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        end)
+    end
+    warn("ANTI AFK!")
+    warn("AZRA HUB HAS BEEN LOADED!")
+end
