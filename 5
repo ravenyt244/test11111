@@ -1,0 +1,85 @@
+if game.PlaceId == 75992362647444 then
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+    local Window = Library.CreateLib("AZRA HUB", {
+        SchemeColor = Color3.fromRGB(0, 255, 255),
+        Background = Color3.fromRGB(0, 0, 0),
+        Header = Color3.fromRGB(0, 0, 0),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        ElementColor = Color3.fromRGB(83, 91, 55)
+    })
+
+
+    local Info = Window:NewTab("Info")
+    local InfoSection = Info:NewSection("Information")
+    InfoSection:NewButton("Copy Discord Link", "Join our discord server!", function()
+        setclipboard("https://discord.gg/hnmJ3nsHS9")
+    end)
+
+
+    -- Example Tab: Main
+    local Main = Window:NewTab("Main")
+    local MainSection = Main:NewSection("Main")
+
+   -- control variable
+    local AutoClicker = false
+
+    MainSection:NewToggle("Auto-Clicker [FAST]", "100 Clicks per second", function(state)
+    AutoClicker = state
+
+    if AutoClicker then
+        task.spawn(function()
+            while AutoClicker do
+                game:GetService("ReplicatedStorage")
+                    ["342a226d-1657-4d38-94b4-99ef454c7f7b"]
+                    .Events.Tap:FireServer(true, false)
+
+                task.wait(0.01) -- 100 clicks per second
+            end
+        end)
+    end
+end)
+
+
+    -- NewButton
+    MainSection:NewButton("Example Button", "Description", function()
+        print("Button clicked")
+    end)
+
+    -- NewLabel
+    MainSection:NewLabel("Example Label")
+
+    -- NewSlider
+    MainSection:NewSlider("Walkspeed", "Changes the Walkspeed", 250, 16, function(v)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+    end)
+
+    -- Example Tab: Customize
+    local Customize = Window:NewTab("Customize")
+    local CustomizeSection = Customize:NewSection("Color Custom")
+
+    -- NewColorPicker
+    CustomizeSection:NewColorPicker("SchemeColor", "Change your SchemeColor", Color3.fromRGB(0, 255, 255), function(color)
+        Library:ChangeColor("SchemeColor", color)
+    end)
+
+    -- Anti-AFK
+    local GC = getconnections or get_signal_cons
+    if GC then
+        for i, v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+            if v["Disable"] then
+                v["Disable"](v)
+            elseif v["Disconnect"] then
+                v["Disconnect"](v)
+            end
+        end
+    else
+        local vu = game:GetService("VirtualUser")
+        game:GetService("Players").LocalPlayer.Idled:connect(function()
+            vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+            wait(1)
+            vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        end)
+    end
+    warn("ANTI AFK!")
+    warn("AZRA HUB HAS BEEN LOADED!")
+end
