@@ -1,0 +1,241 @@
+if game.PlaceId == 75992362647444 then
+    -- Dynamic folder detection to handle changing UUIDs
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local targetFolder = nil
+    
+    -- Get all children and filter for Folders
+    local folders = {}
+    for _, item in ipairs(ReplicatedStorage:GetChildren()) do
+        if item:IsA("Folder") then
+            table.insert(folders, item)
+        end
+    end
+    
+    -- Target the 6th folder specifically (as per your request)
+    if #folders >= 6 then
+        targetFolder = folders[6]  -- 6th folder (the UUID one)
+        print("Detected 6th Folder (UUID): " .. targetFolder.Name)
+        setclipboard(targetFolder.Name)  -- Automatically copies to clipboard
+        print("UUID copied to clipboard!")
+    else
+        warn("AzraHub: Not enough folders in ReplicatedStorage (need at least 6). Features may not work.")
+        return  -- Exit early
+    end
+    
+    -- Additional checks for Events and Functions
+    local eventsFolder = targetFolder:FindFirstChild("Events")
+    local functionsFolder = targetFolder:FindFirstChild("Functions")
+    if not eventsFolder or not functionsFolder then
+        warn("AzraHub: Events or Functions folder missing in " .. targetFolder.Name .. ". Features may not work.")
+        return
+    end
+    
+    -- Check for specific items (Tap, Rebirth, OpenEgg)
+    local tapEvent = eventsFolder:FindFirstChild("Tap")
+    local rebirthFunc = functionsFolder:FindFirstChild("Rebirth")
+    local openEggFunc = functionsFolder:FindFirstChild("OpenEgg")
+    if not tapEvent then warn("AzraHub: Tap event not found.") end
+    if not rebirthFunc then warn("AzraHub: Rebirth function not found.") end
+    if not openEggFunc then warn("AzraHub: OpenEgg function not found.") end
+    
+    -- Proceed with the UI and features
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+    local Window = Library.CreateLib("AzraHub • Tap Simulator", {
+        SchemeColor = Color3.fromRGB(83, 91, 255),
+        Background = Color3.fromRGB(0, 0, 0),
+        Header = Color3.fromRGB(0, 0, 0),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        ElementColor = Color3.fromRGB(20, 20, 20)
+    })
+
+    local Info = Window:NewTab("Info")
+    local InfoSection = Info:NewSection("Information")
+    InfoSection:NewButton("Copy Discord Link", "Join our discord server!", function()
+        setclipboard("https://discord.gg/hnmJ3nsHS9")
+    end)
+
+    -- Example Tab: Main
+    local Main = Window:NewTab("Main")
+    local MainSection = Main:NewSection("Auto Clicker")
+
+    -- Control variable
+    local AutoClicker = false
+
+    MainSection:NewToggle("Auto-Clicker [FAST]", "100 Clicks per second", function(state)
+        AutoClicker = state
+
+        if AutoClicker and tapEvent then
+            task.spawn(function()
+                while AutoClicker do
+                    tapEvent:FireServer(true, false)
+                    task.wait(0.01) -- 100 clicks per second
+                end
+            end)
+        elseif AutoClicker and not tapEvent then
+            warn("AzraHub: Cannot start Auto-Clicker - Tap event not found.")
+        end
+    end)
+
+    local rebirthOptions = {
+        "+35t rebirths", -- 34
+        "+15t rebirths", -- 33
+        "+5t rebirths",  -- 32
+        "+1t rebirths",  -- 31
+        "+700b rebirths",-- 30
+        "+350b rebirths",-- 29
+        "+150b rebirths",-- 28
+        "+50b rebirths", -- 27
+        "+10b rebirths", -- 26
+        "+7b rebirths",  -- 25
+        "+3.5b rebirths",-- 24
+        "+1.5b rebirths",-- 23
+        "+500m rebirths",-- 22
+        "+100m rebirths",-- 21
+        "+70m rebirths", -- 20
+        "+35m rebirths", -- 19
+        "+15m rebirths", -- 18
+        "+5m rebirths",  -- 17
+        "+1m rebirths",  -- 16
+        "+700k rebirths",-- 15
+        "+350k rebirths",-- 14
+        "+150k rebirths",-- 13
+        "+50k rebirths", -- 12
+        "+10k rebirths", -- 11
+        "+7k rebirths",  -- 10
+        "+3.5k rebirths",-- 9
+        "+1.5k rebirths",-- 8
+        "+500 rebirths", -- 7
+        "+100 rebirths", -- 6
+        "+70 rebirths",  -- 5
+        "+35 rebirths",  -- 4
+        "+15 rebirths",  -- 3
+        "+5 rebirths",   -- 2
+        "+1 rebirth"     -- 1
+    }
+
+    -- NewLabel
+    MainSection:NewLabel("Auto Rebirth")
+    local selectedRebirthIndex = 1
+
+    MainSection:NewDropdown(
+        "Choose Rebirth!",
+        "Choose your automatic rebirth amount here",
+        rebirthOptions,
+        function(selected)
+            for index, name in ipairs(rebirthOptions) do
+                if name == selected then
+                    selectedRebirthIndex = 35 - index
+                    break
+                end
+            end
+        end
+    )
+
+    local AutoRebirth = false
+
+    MainSection:NewToggle("Auto Rebirth", "Automatically rebirth based on selection", function(state)
+        AutoRebirth = state
+
+        if AutoRebirth and rebirthFunc then
+            task.spawn(function()
+                while AutoRebirth do
+                    rebirthFunc:InvokeServer(selectedRebirthIndex)
+                    task.wait(0.5) -- safe delay (adjust if needed)
+                end
+            end)
+        elseif AutoRebirth and not rebirthFunc then
+            warn("AzraHub: Cannot start Auto Rebirth - Rebirth function not found.")
+        end
+    end)
+
+    local eggOptions = {
+        "Acorn",
+        "Angelic",
+        "Atlantis",
+        "Basic",
+        "Cactus",
+        "Candy",
+        "Elemental",
+        "Forest",
+        "Frozen",
+        "Holy",
+        "Magma",
+        "Poison",
+        "Safari",
+        "Sakura",
+        "Samurai",
+        "Snowman",
+        "Space",
+        "Temple",
+        "Tropical",
+        "Volcanic"
+    }
+
+    local selectedEgg = "Basic"
+    local selectedEggAmount = 1
+    local AutoHatch = false
+
+    MainSection:NewLabel("Auto Hatch")
+    MainSection:NewDropdown(
+        "Select Egg",
+        "Select the egg you want to hatch",
+        eggOptions,
+        function(option)
+            selectedEgg = option
+        end
+    )
+
+    MainSection:NewDropdown(
+        "Select Egg Amount",
+        "Select the amount of hatching you want",
+        {"1", "3", "8"},
+        function(option)
+            selectedEggAmount = tonumber(option)
+        end
+    )
+
+    MainSection:NewToggle("Auto Hatch", "This will make you auto hatch", function(state)
+        AutoHatch = state
+
+        if AutoHatch and openEggFunc then
+            task.spawn(function()
+                while AutoHatch do
+                    openEggFunc:InvokeServer(selectedEgg, selectedEggAmount)
+                    task.wait(0.5) -- safe delay, adjust if needed
+                end
+            end)
+        elseif AutoHatch and not openEggFunc then
+            warn("AzraHub: Cannot start Auto Hatch - OpenEgg function not found.")
+        end
+    end)
+
+    -- Example Tab: Customize
+    local Customize = Window:NewTab("Customize")
+    local CustomizeSection = Customize:NewSection("Color Custom")
+
+    -- NewColorPicker
+    CustomizeSection:NewColorPicker("SchemeColor", "Change your SchemeColor", Color3.fromRGB(0, 255, 255), function(color)
+        Library:ChangeColor("SchemeColor", color)
+    end)
+
+    -- Anti-AFK (runs regardless)
+    local GC = getconnections or get_signal_cons
+    if GC then
+        for i, v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+            if v["Disable"] then
+                v["Disable"](v)
+            elseif v["Disconnect"] then
+                v["Disconnect"](v)
+            end
+        end
+    else
+        local vu = game:GetService("VirtualUser")
+        game:GetService("Players").LocalPlayer.Idled:connect(function()
+            vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+            wait(1)
+            vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+        end)
+    end
+    warn("ANTI AFK!")
+    warn("AZRA HUB HAS BEEN LOADED!")
+end
